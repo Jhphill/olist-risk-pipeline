@@ -1,0 +1,48 @@
+﻿version: '3.8'
+
+services:
+  postgres:
+    image: postgres:15
+    container_name: olist_postgres
+    environment:
+      POSTGRES_USER: olist_user
+      POSTGRES_PASSWORD: olist_pass
+      POSTGRES_DB: olist_db
+    ports:
+      - "5433:5432"
+    mem_limit: 512m
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+  metabase:
+    image: metabase/metabase
+    container_name: olist_metabase
+    ports:
+      - "3000:3000"
+    mem_limit: 1g
+    environment:
+      MB_DB_TYPE: postgres
+      MB_DB_DBNAME: olist_db
+      MB_DB_HOST: postgres
+      MB_DB_USER: olist_user
+      MB_DB_PASS: olist_pass
+      JAVA_OPTS: "-Xmx768m -Xms256m"
+    depends_on:
+      - postgres
+
+  airflow:
+    image: apache/airflow:2.8.1
+    container_name: olist_airflow
+    ports:
+      - "8080:8080"
+    mem_limit: 1.5g
+    environment:
+      AIRFLOW__CORE__EXECUTOR: SequentialExecutor
+      AIRFLOW__CORE__SQL_ALCHEMY_CONN: postgresql+psycopg2://olist_user:olist_pass@postgres/olist_db
+    volumes:
+      - ./airflow/dags:/opt/airflow/dags
+    depends_on:
+      - postgres
+
+volumes:
+  postgres_data:

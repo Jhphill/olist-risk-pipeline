@@ -1,0 +1,98 @@
+version: 2
+
+models:
+  - name: fct_orders
+    description: "Tabla de hechos principal — pedidos Olist con flag de riesgo"
+    columns:
+      - name: order_id
+        description: "ID único del pedido"
+        tests:
+          - not_null
+          - unique
+
+      - name: customer_sk
+        description: "Surrogate key del cliente"
+        tests:
+          - not_null
+          - relationships:
+              to: ref('dim_customer')
+              field: customer_sk
+
+      - name: date_sk
+        description: "Surrogate key de fecha"
+        tests:
+          - not_null
+          - relationships:
+              to: ref('dim_date')
+              field: date_sk
+
+      - name: payment_method_sk
+        description: "Surrogate key del método de pago"
+        tests:
+          - relationships:
+              to: ref('dim_payment_method')
+              field: payment_method_sk
+
+      - name: order_status
+        tests:
+          - accepted_values:
+              values: ['delivered','shipped','canceled','unavailable',
+                       'processing','invoiced','approved','created']
+
+      - name: flag_riesgo
+        tests:
+          - not_null
+          - accepted_values:
+              values: [0, 1]
+
+      - name: flag_review_negativa
+        tests:
+          - accepted_values:
+              values: [0, 1]
+
+      - name: total_value
+        tests:
+          - not_null
+
+  - name: dim_customer
+    columns:
+      - name: customer_sk
+        tests:
+          - not_null
+          - unique
+      - name: customer_unique_id
+        tests:
+          - not_null
+      - name: state
+        tests:
+          - not_null
+
+  - name: dim_seller
+    columns:
+      - name: seller_sk
+        tests:
+          - not_null
+          - unique
+      - name: seller_id
+        tests:
+          - not_null
+
+  - name: dim_date
+    columns:
+      - name: date_sk
+        tests:
+          - not_null
+          - unique
+      - name: full_date
+        tests:
+          - not_null
+
+  - name: dim_payment_method
+    columns:
+      - name: payment_method_sk
+        tests:
+          - not_null
+          - unique
+      - name: payment_type
+        tests:
+          - not_null
