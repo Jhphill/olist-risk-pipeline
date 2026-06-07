@@ -1,6 +1,7 @@
 version: 2
 
 sources:
+  # ── Mes 1: carga batch original (raw_*) ──────────────────────
   - name: public
     database: olist_db
     schema: public
@@ -14,4 +15,12 @@ sources:
       - name: raw_sellers
       - name: raw_geolocation
       - name: raw_product_category_translation
-      
+
+  # ── Mes 2: streaming (Kafka → Spark → bronze.*) ──────────────
+  - name: bronze
+    database: olist_db
+    schema: bronze
+    tables:
+      - name: orders
+      - name: payments
+      - name: reviews

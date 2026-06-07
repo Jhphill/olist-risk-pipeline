@@ -1,3 +1,4 @@
+-- models/gold/fct_orders.sql
 {{ config(materialized='table') }}
 
 WITH seller_por_orden AS (
@@ -17,11 +18,29 @@ review_por_orden AS (
     ORDER BY order_id, review_score ASC
 ),
 
+-- Bronze orders limpio: filtra NaN antes de cualquier JOIN
+bronze_orders_clean AS (
+    SELECT
+        order_id,
+        customer_id,
+        order_status,
+        CASE WHEN order_purchase_timestamp IN ('NaN','nan','','null','None')
+             THEN NULL
+             ELSE order_purchase_timestamp::timestamp
+        END AS purchase_ts_raw,
+        ingestion_timestamp
+    FROM {{ source('bronze', 'orders') }}
+    WHERE order_id IS NOT NULL
+      AND order_id NOT IN ('NaN','nan','','null','None')
+      AND customer_id IS NOT NULL
+      AND customer_id NOT IN ('NaN','nan','','null','None')
+),
+
 cliente_por_orden AS (
     SELECT DISTINCT ON (o.order_id)
         o.order_id,
         c.customer_sk
-    FROM {{ source('public', 'raw_orders') }} o
+    FROM bronze_orders_clean o
     JOIN {{ source('public', 'raw_customers') }} rc
       ON o.customer_id = rc.customer_id
     JOIN {{ ref('stg_customers') }} c
@@ -32,9 +51,9 @@ cliente_por_orden AS (
 SELECT
     o.order_id,
     cl.customer_sk,
-    md5(s.seller_id)                                AS seller_sk,
+    md5(COALESCE(s.seller_id, 'unknown'))           AS seller_sk,
     TO_CHAR(o.purchase_ts, 'YYYYMMDD')::integer     AS date_sk,
-    md5(p.payment_type)                             AS payment_method_sk,
+    md5(COALESCE(p.payment_type, 'unknown'))        AS payment_method_sk,
     COALESCE(p.total_value, 0)                      AS total_value,
     COALESCE(p.max_installments, 0)                 AS installments,
     o.dias_atraso,
@@ -52,11 +71,7 @@ SELECT
     o.ingestion_timestamp
 
 FROM {{ ref('stg_orders') }} o
-LEFT JOIN cliente_por_orden cl
-       ON o.order_id = cl.order_id
-LEFT JOIN seller_por_orden s
-       ON o.order_id = s.order_id
-LEFT JOIN {{ ref('stg_payments') }} p
-       ON o.order_id = p.order_id
-LEFT JOIN review_por_orden r
-       ON o.order_id = r.order_id
+LEFT JOIN cliente_por_orden cl  ON o.order_id = cl.order_id
+LEFT JOIN seller_por_orden s    ON o.order_id = s.order_id
+LEFT JOIN {{ ref('stg_payments') }} p ON o.order_id = p.order_id
+LEFT JOIN review_por_orden r    ON o.order_id = r.order_id
