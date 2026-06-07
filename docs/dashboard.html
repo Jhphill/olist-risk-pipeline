@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<title>Dashboard — Análisis de Riesgo Olist</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Segoe UI', sans-serif; background: #0f1117; color: #e0e0e0; }
+  header { background: linear-gradient(135deg, #1a1f2e, #2d3561);
+            padding: 2rem; text-align: center; border-bottom: 2px solid #3498DB; }
+  header h1 { font-size: 1.8rem; color: #fff; margin-bottom: 0.3rem; }
+  header p  { color: #94a3b8; font-size: 0.9rem; }
+  .kpis { display: flex; gap: 1rem; padding: 1.5rem 2rem; flex-wrap: wrap; }
+  .kpi { background: #1e2433; border-radius: 10px; padding: 1.2rem 1.8rem;
+          flex: 1; min-width: 160px; border-left: 4px solid #3498DB; }
+  .kpi .val { font-size: 2rem; font-weight: bold; color: #3498DB; }
+  .kpi .lab { font-size: 0.8rem; color: #94a3b8; margin-top: 0.3rem; }
+  .kpi.red { border-left-color: #E74C3C; }
+  .kpi.red .val { color: #E74C3C; }
+  .kpi.green { border-left-color: #2ECC71; }
+  .kpi.green .val { color: #2ECC71; }
+  .grid { display: grid; grid-template-columns: 1fr 1fr;
+           gap: 1.5rem; padding: 0 2rem 2rem; }
+  .card { background: #1e2433; border-radius: 12px; padding: 1.2rem;
+           border: 1px solid #2d3561; }
+  .card h3 { font-size: 0.9rem; color: #94a3b8; margin-bottom: 1rem;
+              text-transform: uppercase; letter-spacing: 0.05em; }
+  .card img { width: 100%; border-radius: 6px; }
+  footer { text-align: center; padding: 1.5rem; color: #4a5568; font-size: 0.8rem; }
+  @media (max-width: 768px) { .grid { grid-template-columns: 1fr; } }
+</style>
+</head>
+<body>
+<header>
+  <h1>📊 Pipeline Olist — Análisis de Riesgo de Impago</h1>
+  <p>UNIVALLE · Ingeniería de Datos · 2026 · Juan Felipe Caballero & Luciana Coca</p>
+</header>
+
+<div class="kpis">
+  <div class="kpi"><div class="val">99,441</div>
+    <div class="lab">Total de pedidos</div></div>
+  <div class="kpi red"><div class="val">15.0%</div>
+    <div class="lab">Pedidos con flag_riesgo</div></div>
+  <div class="kpi red"><div class="val">0.6%</div>
+    <div class="lab">Tasa de cancelación</div></div>
+  <div class="kpi green"><div class="val">4.03</div>
+    <div class="lab">Review score promedio</div></div>
+  <div class="kpi"><div class="val">99,441</div>
+    <div class="lab">Pedidos únicos validados</div></div>
+</div>
+
+<div class="grid">
+  <div class="card">
+    <h3>Riesgo por estado del pedido</h3>
+    <img src="screenshots/viz1_riesgo_status.png">
+  </div>
+  <div class="card">
+    <h3>Review score por región</h3>
+    <img src="screenshots/viz2_score_region.png">
+  </div>
+  <div class="card">
+    <h3>Cuotas vs satisfacción del cliente</h3>
+    <img src="screenshots/viz3_cuotas_score.png">
+  </div>
+  <div class="card">
+    <h3>Top 10 estados con mayor riesgo</h3>
+    <img src="screenshots/viz4_riesgo_estados.png">
+  </div>
+</div>
+
+<footer>
+  Pipeline de Datos · Dataset Olist · dbt + PostgreSQL + Great Expectations
+</footer>
+</body>
+</html>
